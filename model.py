@@ -54,10 +54,10 @@ def bayesian_optimize_rf(X_train, y_train):
             "min_samples_leaf": int(min_samples_leaf),
             "max_features": max_features,
             "random_state": RANDOM_STATE,
-            "n_jobs": -1,
+            "n_jobs": 8,
         }
         rf = RandomForestClassifier(**params)
-        scores = cross_val_score(rf, X_train, y_train, cv=CV_FOLDS, scoring="roc_auc", n_jobs=-1)
+        scores = cross_val_score(rf, X_train, y_train, cv=CV_FOLDS, scoring="roc_auc", n_jobs=8)
         return scores.mean()
 
     optimizer = BayesianOptimization(
