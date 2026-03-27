@@ -15,7 +15,7 @@ CV_FOLDS = 5
 
 BAYESIAN_OPT_PARAMS = {
     "n_estimators": (50, 500),
-    "max_depth": (3, 30),
+    "max_depth": (3, 15),
     "min_samples_split": (2, 20),
     "min_samples_leaf": (1, 10),
     "max_features": (0.1, 0.9),
@@ -32,5 +32,5 @@ BASELINE_RF_PARAMS = {
     "min_samples_split": 5,
     "min_samples_leaf": 2,
     "random_state": RANDOM_STATE,
-    "n_jobs": -1,
+    "n_jobs": 8,
 }

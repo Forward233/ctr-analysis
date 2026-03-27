@@ -74,7 +74,7 @@ def bayesian_optimize_rf(X_train, y_train):
     best_params["min_samples_split"] = int(best_params["min_samples_split"])
     best_params["min_samples_leaf"] = int(best_params["min_samples_leaf"])
     best_params["random_state"] = RANDOM_STATE
-    best_params["n_jobs"] = -1
+    best_params["n_jobs"] = 8
 
     print(f"[贝叶斯优化] 最优参数: {best_params}")
     print(f"[贝叶斯优化] 最优AUC: {optimizer.max['target']:.4f}")
@@ -86,26 +86,30 @@ def bayesian_optimize_rf(X_train, y_train):
 
 
 def apply_ccp_pruning(X_train, y_train, X_test, y_test, best_params):
-    pruning_params = {k: v for k, v in best_params.items() if k != "n_jobs"}
-    pruning_params["n_jobs"] = 1
-
-    dt = DecisionTreeClassifier(
-        max_depth=pruning_params.get("max_depth", 10),
-        min_samples_split=pruning_params.get("min_samples_split", 5),
-        min_samples_leaf=pruning_params.get("min_samples_leaf", 2),
+    ref_rf = RandomForestClassifier(
+        n_estimators=best_params.get("n_estimators", 100),
+        max_depth=best_params.get("max_depth", 10),
+        min_samples_split=best_params.get("min_samples_split", 5),
+        min_samples_leaf=best_params.get("min_samples_leaf", 2),
+        max_features=best_params.get("max_features", 0.5),
         random_state=RANDOM_STATE,
+        n_jobs=8,
     )
-    dt.fit(X_train, y_train)
+    ref_rf.fit(X_train, y_train)
 
-    path = dt.cost_complexity_pruning_path(X_train, y_train)
-    ccp_alphas = path.ccp_alphas
-    impurities = path.impurities
+    path = ref_rf.estimators_[0].cost_complexity_pruning_path(X_train, y_train)
+    ccp_alphas = path.ccp_alphas[path.ccp_alphas > 0]
 
     best_alpha = 0
     best_auc = 0
     alpha_scores = []
 
-    sample_alphas = np.linspace(0, ccp_alphas.max() * 0.5, min(20, len(ccp_alphas)))
+    if len(ccp_alphas) == 0:
+        print("[CCP剪枝] 未找到有效alpha，跳过剪枝，使用alpha=0")
+        final_rf = ref_rf
+        return final_rf, best_alpha
+
+    sample_alphas = np.linspace(ccp_alphas.min(), ccp_alphas.max() * 0.3, min(20, len(ccp_alphas)))
     for alpha in sample_alphas:
         rf_pruned = RandomForestClassifier(
             n_estimators=best_params.get("n_estimators", 100),
@@ -115,7 +119,7 @@ def apply_ccp_pruning(X_train, y_train, X_test, y_test, best_params):
             max_features=best_params.get("max_features", 0.5),
             ccp_alpha=alpha,
             random_state=RANDOM_STATE,
-            n_jobs=-1,
+            n_jobs=8,
         )
         rf_pruned.fit(X_train, y_train)
         y_prob = rf_pruned.predict_proba(X_test)[:, 1]
@@ -147,7 +151,7 @@ def apply_ccp_pruning(X_train, y_train, X_test, y_test, best_params):
         max_features=best_params.get("max_features", 0.5),
         ccp_alpha=best_alpha,
         random_state=RANDOM_STATE,
-        n_jobs=-1,
+        n_jobs=8,
     )
     final_rf.fit(X_train, y_train)
 
@@ -282,7 +286,7 @@ def run_ablation_study(X_train, y_train, X_test, y_test, best_params,
     results.append(m)
 
     best_p = {k: v for k, v in best_params.items()}
-    best_p["n_jobs"] = -1
+    best_p["n_jobs"] = 8
     best_p["random_state"] = RANDOM_STATE
     rf_bayes = RandomForestClassifier(**best_p)
     rf_bayes.fit(X_sm, y_sm)

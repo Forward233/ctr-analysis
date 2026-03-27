@@ -10,7 +10,7 @@ warnings.filterwarnings("ignore")
 from config import RANDOM_STATE, TEST_SIZE, OUTPUT_DIR, FIGURE_DIR
 from data_loader import load_data
 from feature_engineering import (
-    preprocess_data, build_features, encode_features,
+    preprocess_data, build_features, encode_features, scale_features,
     pearson_correlation_analysis, plot_feature_distributions,
     lasso_feature_selection
 )
@@ -62,24 +62,29 @@ def main(data_path=None):
     plot_feature_distributions(df, target_col="click")
     print(f"  构建特征后: {df.shape[1]} 个字段")
 
-    print("\n[4/9] 特征编码与归一化...")
-    df_encoded, scaler = encode_features(df, target_col="click")
+    print("\n[4/9] 特征编码与数据划分...")
+    df_encoded = encode_features(df, target_col="click")
 
     X = df_encoded.drop("click", axis=1)
     y = df_encoded["click"]
     print(f"  特征维度: {X.shape[1]}")
 
-    print("\n  相关性分析...")
-    top_corr = pearson_correlation_analysis(df_encoded, target_col="click")
-
-    print("\n  LASSO特征筛选...")
-    selected_features, lasso_model = lasso_feature_selection(X, y)
-    X_selected = X[selected_features]
-    print(f"  筛选后特征数: {len(selected_features)}")
-
     X_train_full, X_test_full, y_train, y_test = train_test_split(
         X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y
     )
+
+    print("\n  归一化（仅在训练集fit）...")
+    X_train_full, X_test_full, scaler = scale_features(X_train_full, X_test_full)
+
+    print("\n  相关性分析...")
+    top_corr = pearson_correlation_analysis(
+        pd.concat([X_train_full, y_train], axis=1), target_col="click"
+    )
+
+    print("\n  LASSO特征筛选（仅在训练集fit）...")
+    selected_features, lasso_model = lasso_feature_selection(X_train_full, y_train)
+    print(f"  筛选后特征数: {len(selected_features)}")
+
     X_train = X_train_full[selected_features]
     X_test = X_test_full[selected_features]
 

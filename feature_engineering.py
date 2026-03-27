@@ -77,20 +77,28 @@ def encode_features(df, target_col="click"):
             df = pd.concat([df, dummies], axis=1)
             df.drop(col, axis=1, inplace=True)
 
-    scaler = MinMaxScaler()
-    continuous_cols = [
-        "price", "sales_volume", "item_rating", "item_review_count",
-        "user_click_history", "user_purchase_history", "user_avg_dwell_time",
-        "user_category_preference", "user_brand_preference", "user_session_depth",
-        "item_ctr_history", "item_conversion_rate", "price_rank_in_category",
-        "position_in_list", "price_sales_ratio", "click_to_purchase_ratio",
-        "weighted_rating", "hour_sin", "hour_cos", "dow_sin", "dow_cos",
-        "price_vs_category_avg", "ctr_cvr_ratio"
-    ]
-    existing_cont = [c for c in continuous_cols if c in df.columns]
-    df[existing_cont] = scaler.fit_transform(df[existing_cont])
+    return df
 
-    return df, scaler
+
+CONTINUOUS_COLS = [
+    "price", "sales_volume", "item_rating", "item_review_count",
+    "user_click_history", "user_purchase_history", "user_avg_dwell_time",
+    "user_category_preference", "user_brand_preference", "user_session_depth",
+    "item_ctr_history", "item_conversion_rate", "price_rank_in_category",
+    "position_in_list", "price_sales_ratio", "click_to_purchase_ratio",
+    "weighted_rating", "hour", "day_of_week", "hour_sin", "hour_cos",
+    "dow_sin", "dow_cos", "price_vs_category_avg", "ctr_cvr_ratio"
+]
+
+
+def scale_features(X_train, X_test):
+    scaler = MinMaxScaler()
+    existing_cont = [c for c in CONTINUOUS_COLS if c in X_train.columns]
+    X_train = X_train.copy()
+    X_test = X_test.copy()
+    X_train[existing_cont] = scaler.fit_transform(X_train[existing_cont])
+    X_test[existing_cont] = scaler.transform(X_test[existing_cont])
+    return X_train, X_test, scaler
 
 
 def pearson_correlation_analysis(df, target_col="click", top_n=20):
