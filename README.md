@@ -25,15 +25,10 @@ pip install -r requirements.txt
 
 ## 运行实验
 
-**第一步：生成数据集**（首次运行必须）
-```bash
-python generate_optimized_data.py
-```
-
-**第二步：运行主程序**
 ```bash
 python main.py
 ```
+
 
 ## 项目结构
 
@@ -43,7 +38,6 @@ python main.py
 ├── feature_engineering.py # 特征工程、归一化、LASSO筛选
 ├── model.py               # 模型训练、贝叶斯优化、CCP剪枝、消融实验
 ├── explainability.py      # SHAP可解释性分析
-├── generate_optimized_data.py # 数据集生成脚本（首次运行用）
 ├── quick_test.py          # 快速调试脚本
 ├── main.py                # 主程序入口
 ├── requirements.txt       # 依赖清单
