@@ -116,6 +116,8 @@ def generate_synthetic_data(n_samples=100000):
 
 def load_data(data_path=None):
     if data_path:
+        if not os.path.exists(data_path):
+            raise FileNotFoundError(f"指定的数据文件不存在: {data_path}")
         df = load_aliccp_data(data_path)
         if df is not None:
             return df
@@ -128,5 +130,5 @@ def load_data(data_path=None):
     raise FileNotFoundError(
         f"未找到数据文件。请先运行 generate_optimized_data.py 生成数据集：\n"
         f"  python generate_optimized_data.py\n"
-        f"或指定数据路径：main.py --data <path>"
+        f"或指定数据路径：python main.py <path>"
     )
