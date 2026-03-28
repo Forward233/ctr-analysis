@@ -17,11 +17,11 @@ def shap_analysis(model, X_test, feature_names=None, max_display=20):
     if feature_names is None:
         feature_names = X_test.columns.tolist()
 
-    sample_size = min(2000, len(X_test))
+    sample_size = min(500, len(X_test))
     X_sample = X_test.sample(n=sample_size, random_state=42)
 
     explainer = shap.TreeExplainer(model)
-    shap_values = explainer.shap_values(X_sample)
+    shap_values = explainer.shap_values(X_sample, check_additivity=False)
 
     # 修复: 兼容不同版本 SHAP 的返回格式
     # 旧版返回 list[ndarray]，新版可能返回 3D ndarray
