@@ -23,7 +23,7 @@ build/
 # data/*.csv
 
 # Output files
-output/
+# output/  # 已开放：提交实验结果和图表
 *.pkl
 
 # Environment
