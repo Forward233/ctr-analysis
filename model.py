@@ -104,8 +104,9 @@ def apply_ccp_pruning(X_train, y_train, X_test, y_test, best_params):
     path = ref_rf.estimators_[0].cost_complexity_pruning_path(X_train, y_train)
     ccp_alphas = path.ccp_alphas[path.ccp_alphas > 0]
 
+    y_prob_ref = ref_rf.predict_proba(X_test)[:, 1]
+    best_auc = roc_auc_score(y_test, y_prob_ref)
     best_alpha = 0
-    best_auc = 0
     alpha_scores = []
 
     if len(ccp_alphas) == 0:
@@ -113,7 +114,9 @@ def apply_ccp_pruning(X_train, y_train, X_test, y_test, best_params):
         final_rf = ref_rf
         return final_rf, best_alpha
 
-    sample_alphas = np.linspace(ccp_alphas.min(), ccp_alphas.max() * 0.3, min(20, len(ccp_alphas)))
+    log_min = np.log10(ccp_alphas.min())
+    log_max = np.log10(ccp_alphas.max())
+    sample_alphas = np.logspace(log_min, log_max, min(20, len(ccp_alphas)))
     for alpha in sample_alphas:
         rf_pruned = RandomForestClassifier(
             n_estimators=best_params.get("n_estimators", 100),
