@@ -7,9 +7,7 @@ import matplotlib.pyplot as plt
 import os
 from config import FIGURE_DIR
 
-# 修复: 使用 Noto Sans CJK SC 替代 SimHei，兼容 Linux 环境
-# 如果在 Windows 上运行可改回 SimHei
-plt.rcParams["font.sans-serif"] = ["Noto Sans CJK SC", "SimHei", "DejaVu Sans"]
+plt.rcParams["font.sans-serif"] = ["Noto Sans CJK SC", "Noto Sans CJK JP", "SimHei", "DejaVu Sans"]
 plt.rcParams["axes.unicode_minus"] = False
 
 

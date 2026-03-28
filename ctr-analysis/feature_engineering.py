@@ -10,7 +10,7 @@ import seaborn as sns
 import os
 from config import FIGURE_DIR
 
-plt.rcParams["font.sans-serif"] = ["Noto Sans CJK SC", "SimHei", "DejaVu Sans"]
+plt.rcParams["font.sans-serif"] = ["Noto Sans CJK SC", "Noto Sans CJK JP", "SimHei", "DejaVu Sans"]
 plt.rcParams["axes.unicode_minus"] = False
 
 
