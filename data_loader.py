@@ -4,14 +4,7 @@ from config import DATA_DIR, RANDOM_STATE
 import os
 
 
-def load_aliccp_data(sample_path=None):
-    if sample_path and os.path.exists(sample_path):
-        df = pd.read_csv(sample_path)
-        return df
-    return None
-
-
-def generate_synthetic_data(n_samples=100000):
+def _unused_generate_synthetic_data(n_samples=100000):
     """
     优化版数据生成函数
     设计原则：
@@ -115,20 +108,7 @@ def generate_synthetic_data(n_samples=100000):
 
 
 def load_data(data_path=None):
-    if data_path:
-        if not os.path.exists(data_path):
-            raise FileNotFoundError(f"指定的数据文件不存在: {data_path}")
-        df = load_aliccp_data(data_path)
-        if df is not None:
-            return df
-
-    default_path = os.path.join(DATA_DIR, "synthetic_ecommerce_ctr.csv")
-    if os.path.exists(default_path):
-        print(f"[INFO] 加载数据集: {default_path}")
-        return pd.read_csv(default_path)
-
-    raise FileNotFoundError(
-        f"未找到数据文件。请先运行 generate_optimized_data.py 生成数据集：\n"
-        f"  python generate_optimized_data.py\n"
-        f"或指定数据路径：python main.py <path>"
-    )
+    path = data_path if data_path else os.path.join(DATA_DIR, "ecommerce_ctr.csv")
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"数据文件不存在: {path}")
+    return pd.read_csv(path)

@@ -204,6 +204,6 @@ if __name__ == "__main__":
 
     data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
     os.makedirs(data_dir, exist_ok=True)
-    output_path = os.path.join(data_dir, "synthetic_ecommerce_ctr.csv")
+    output_path = os.path.join(data_dir, "ecommerce_ctr.csv")
     df.to_csv(output_path, index=False)
     print(f"\n数据已保存至: {output_path}")

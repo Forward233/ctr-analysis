@@ -39,16 +39,16 @@ python main.py
 
 ```
 ├── config.py              # 配置参数（超参数搜索空间、SMOTE策略等）
-├── data_loader.py         # 数据加载与合成数据生成
+├── data_loader.py         # 数据加载
 ├── feature_engineering.py # 特征工程、归一化、LASSO筛选
 ├── model.py               # 模型训练、贝叶斯优化、CCP剪枝、消融实验
 ├── explainability.py      # SHAP可解释性分析
-├── generate_optimized_data.py # 数据生成脚本（开发用，已合并至data_loader）
+├── generate_optimized_data.py # 数据集生成脚本（首次运行用）
 ├── quick_test.py          # 快速调试脚本
 ├── main.py                # 主程序入口
 ├── requirements.txt       # 依赖清单
 ├── 论文问题说明.md         # 代码问题记录与修正说明（共14处）
-├── data/                  # 数据目录（合成数据自动生成）
+├── data/                  # 数据目录
 └── output/                # 实验结果输出
     ├── figures/           # 图表（ROC、SHAP、消融实验等）
     ├── ablation_study.csv # 消融实验结果
