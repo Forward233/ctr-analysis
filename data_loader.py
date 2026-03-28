@@ -115,9 +115,18 @@ def generate_synthetic_data(n_samples=100000):
 
 
 def load_data(data_path=None):
-    df = load_aliccp_data(data_path)
-    if df is None:
-        print("[INFO] 未检测到真实数据集，使用合成数据进行演示...")
-        df = generate_synthetic_data()
-        df.to_csv(os.path.join(DATA_DIR, "synthetic_ecommerce_ctr.csv"), index=False)
-    return df
+    if data_path:
+        df = load_aliccp_data(data_path)
+        if df is not None:
+            return df
+
+    default_path = os.path.join(DATA_DIR, "synthetic_ecommerce_ctr.csv")
+    if os.path.exists(default_path):
+        print(f"[INFO] 加载数据集: {default_path}")
+        return pd.read_csv(default_path)
+
+    raise FileNotFoundError(
+        f"未找到数据文件。请先运行 generate_optimized_data.py 生成数据集：\n"
+        f"  python generate_optimized_data.py\n"
+        f"或指定数据路径：main.py --data <path>"
+    )

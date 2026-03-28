@@ -25,6 +25,12 @@ pip install -r requirements.txt
 
 ## 运行实验
 
+**第一步：生成数据集**（首次运行必须）
+```bash
+python generate_optimized_data.py
+```
+
+**第二步：运行主程序**
 ```bash
 python main.py
 ```
