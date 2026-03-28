@@ -25,12 +25,6 @@ pip install -r requirements.txt
 
 ## 运行实验
 
-### 方式1：Jupyter Notebook
-```bash
-jupyter notebook 毕业论文实验.ipynb
-```
-
-### 方式2：命令行
 ```bash
 python main.py
 ```
@@ -38,16 +32,45 @@ python main.py
 ## 项目结构
 
 ```
-├── config.py              # 配置参数
-├── data_loader.py         # 数据加载与合成
-├── feature_engineering.py # 特征工程
-├── model.py               # 模型训练与评估
-├── explainability.py      # 可解释性分析
+├── config.py              # 配置参数（超参数搜索空间、SMOTE策略等）
+├── data_loader.py         # 数据加载与合成数据生成
+├── feature_engineering.py # 特征工程、归一化、LASSO筛选
+├── model.py               # 模型训练、贝叶斯优化、CCP剪枝、消融实验
+├── explainability.py      # SHAP可解释性分析
+├── generate_optimized_data.py # 数据生成脚本（开发用，已合并至data_loader）
+├── quick_test.py          # 快速调试脚本
 ├── main.py                # 主程序入口
-├── 毕业论文实验.ipynb      # 实验Notebook
 ├── requirements.txt       # 依赖清单
-└── data/                  # 数据目录
+├── 论文问题说明.md         # 代码问题记录与修正说明（共14处）
+├── data/                  # 数据目录（合成数据自动生成）
+└── output/                # 实验结果输出
+    ├── figures/           # 图表（ROC、SHAP、消融实验等）
+    ├── ablation_study.csv # 消融实验结果
+    ├── model_comparison.csv # 模型对比结果
+    └── optimized_rf_model.pkl # 最终模型（gitignore）
 ```
+
+## 实验结果
+
+### 消融实验
+
+| 步骤 | AUC | Recall | F1 |
+|------|-----|--------|-----|
+| 基线RF | 0.7492 | 0.063 | 0.115 |
+| +LASSO特征筛选 | 0.7513 | 0.075 | 0.136 |
+| +SMOTE重采样 | 0.7412 | 0.169 | 0.259 |
+| +贝叶斯优化 | 0.7466 | 0.230 | 0.323 |
+| +CCP剪枝 | **0.7468** | **0.230** | **0.323** |
+
+### 关键超参数（贝叶斯优化结果）
+
+| 参数 | 搜索范围 | 最优值 |
+|------|---------|--------|
+| n_estimators | [50, 500] | 218 |
+| max_depth | [3, 15] | 14 |
+| min_samples_split | [2, 20] | 15 |
+| min_samples_leaf | [1, 3] | 2 |
+| max_features | [0.1, 0.9] | 0.225 |
 
 ## 依赖
 
