@@ -9,6 +9,7 @@ from sklearn.metrics import (
     f1_score, accuracy_score, roc_curve, confusion_matrix
 )
 from imblearn.over_sampling import SMOTE
+from imblearn.pipeline import Pipeline as ImbPipeline
 from bayes_opt import BayesianOptimization
 import xgboost as xgb
 import lightgbm as lgb
@@ -56,8 +57,11 @@ def bayesian_optimize_rf(X_train, y_train):
             "random_state": RANDOM_STATE,
             "n_jobs": 8,
         }
-        rf = RandomForestClassifier(**params)
-        scores = cross_val_score(rf, X_train, y_train, cv=CV_FOLDS, scoring="roc_auc", n_jobs=8)
+        pipeline = ImbPipeline([
+            ("smote", SMOTE(sampling_strategy=SMOTE_SAMPLING_STRATEGY, random_state=RANDOM_STATE)),
+            ("rf", RandomForestClassifier(**params)),
+        ])
+        scores = cross_val_score(pipeline, X_train, y_train, cv=CV_FOLDS, scoring="roc_auc", n_jobs=1)
         return scores.mean()
 
     optimizer = BayesianOptimization(
@@ -279,25 +283,33 @@ def run_ablation_study(X_train, y_train, X_test, y_test, best_params,
     m, _, _ = evaluate_model(rf_lasso, X_test[X_train.columns], y_test, "+LASSO特征筛选")
     results.append(m)
 
-    X_sm, y_sm = apply_smote(X_train, y_train)
-    rf_smote = RandomForestClassifier(**BASELINE_RF_PARAMS)
-    rf_smote.fit(X_sm, y_sm)
-    m, _, _ = evaluate_model(rf_smote, X_test[X_train.columns], y_test, "+SMOTE重采样")
+    pipeline_smote = ImbPipeline([
+        ("smote", SMOTE(sampling_strategy=SMOTE_SAMPLING_STRATEGY, random_state=RANDOM_STATE)),
+        ("rf", RandomForestClassifier(**BASELINE_RF_PARAMS)),
+    ])
+    pipeline_smote.fit(X_train, y_train)
+    m, _, _ = evaluate_model(pipeline_smote, X_test[X_train.columns], y_test, "+SMOTE重采样")
     results.append(m)
 
     best_p = {k: v for k, v in best_params.items()}
     best_p["n_jobs"] = 8
     best_p["random_state"] = RANDOM_STATE
-    rf_bayes = RandomForestClassifier(**best_p)
-    rf_bayes.fit(X_sm, y_sm)
-    m, _, _ = evaluate_model(rf_bayes, X_test[X_train.columns], y_test, "+贝叶斯优化")
+    pipeline_bayes = ImbPipeline([
+        ("smote", SMOTE(sampling_strategy=SMOTE_SAMPLING_STRATEGY, random_state=RANDOM_STATE)),
+        ("rf", RandomForestClassifier(**best_p)),
+    ])
+    pipeline_bayes.fit(X_train, y_train)
+    m, _, _ = evaluate_model(pipeline_bayes, X_test[X_train.columns], y_test, "+贝叶斯优化")
     results.append(m)
 
     best_p_ccp = {k: v for k, v in best_p.items()}
     best_p_ccp["ccp_alpha"] = ccp_alpha
-    rf_all = RandomForestClassifier(**best_p_ccp)
-    rf_all.fit(X_sm, y_sm)
-    m, _, _ = evaluate_model(rf_all, X_test[X_train.columns], y_test, "+CCP剪枝（完整优化）")
+    pipeline_ccp = ImbPipeline([
+        ("smote", SMOTE(sampling_strategy=SMOTE_SAMPLING_STRATEGY, random_state=RANDOM_STATE)),
+        ("rf", RandomForestClassifier(**best_p_ccp)),
+    ])
+    pipeline_ccp.fit(X_train, y_train)
+    m, _, _ = evaluate_model(pipeline_ccp, X_test[X_train.columns], y_test, "+CCP剪枝（完整优化）")
     results.append(m)
 
     df_ablation = pd.DataFrame(results)
