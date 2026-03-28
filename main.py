@@ -98,7 +98,8 @@ def main(data_path=None):
     print(f"  基线RF AUC: {baseline_metrics['AUC']:.4f}")
 
     print("\n  贝叶斯优化随机森林...")
-    optimized_rf, best_params, optimizer = bayesian_optimize_rf(X_train_sm, y_train_sm)
+    optimized_rf, best_params, optimizer = bayesian_optimize_rf(X_train, y_train)
+    optimized_rf.fit(X_train_sm, y_train_sm)
     opt_metrics, _, opt_prob = evaluate_model(optimized_rf, X_test, y_test, "贝叶斯优化RF")
     print(f"  优化RF AUC: {opt_metrics['AUC']:.4f}")
 
